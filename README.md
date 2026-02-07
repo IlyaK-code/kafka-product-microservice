@@ -1,2 +1,3 @@
 # kafka-product-microservice
-Microservice for created topic and message in kafka. Currently in development
+Микросервис для создания топика и публикации сообщений в kafka. 
+### В данный момент в разработке.
