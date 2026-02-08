@@ -32,3 +32,4 @@ build/
 ### VS Code ###
 .vscode/
 /src/main/java/ru/ws/productMicroservice/config/kafkaConfig.java
+/kafka/docker/volumes/
