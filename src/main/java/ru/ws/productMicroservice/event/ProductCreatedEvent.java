@@ -14,5 +14,4 @@ public class ProductCreatedEvent {
     private String title;
     private String price;
     private String quantity;
-
 }

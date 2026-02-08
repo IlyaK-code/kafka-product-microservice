@@ -1,6 +1,7 @@
 package ru.ws.productMicroservice.controller;
 
-import org.apache.kafka.clients.admin.NewTopic;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -9,11 +10,15 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.ws.productMicroservice.dto.CreateProductDto;
 import ru.ws.productMicroservice.service.ProductService;
+import ru.ws.productMicroservice.utils.ErrorMessage;
+
+import java.util.Date;
 
 @RestController
 @RequestMapping("/product")
 public class ProductController {
 
+    private Logger LOGGER = LoggerFactory.getLogger(ProductController.class);
     private ProductService productService;
 
     public ProductController(ProductService productService) {
@@ -21,8 +26,14 @@ public class ProductController {
     }
 
     @PostMapping
-    public ResponseEntity<String> createProduct(@RequestBody CreateProductDto createProductDto) {
-        String productId = productService.createProduct(createProductDto);
+    public ResponseEntity<Object> createProduct(@RequestBody CreateProductDto createProductDto) {
+        String productId = null;
+        try {
+            productId = productService.createProduct(createProductDto);
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorMessage(new Date(), e.getMessage()));
+        }
         return ResponseEntity.status(HttpStatus.CREATED).body(productId);
     }
 }

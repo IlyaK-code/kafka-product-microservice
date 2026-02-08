@@ -10,6 +10,7 @@ import ru.ws.productMicroservice.event.ProductCreatedEvent;
 
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 @Service
 public class ProductServiceImpl implements ProductService {
@@ -22,7 +23,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public String createProduct(CreateProductDto createProductDto) {
+    public String createProduct(CreateProductDto createProductDto) throws ExecutionException, InterruptedException {
         //TODO save DB
         String productId = UUID.randomUUID().toString();
 
@@ -30,14 +31,12 @@ public class ProductServiceImpl implements ProductService {
                 createProductDto.getPrice(), createProductDto.getQuantity()
         );
 
-        CompletableFuture<SendResult<String, ProductCreatedEvent>> future = kafkaTemplate.send("product-created-event-topic", productId, productCreatedEvent);
-        future.whenComplete((r, e) -> {
-            if (e != null) {
-                LOGGER.error("Failed to send message: {}", e.getMessage());
-            } else {
-                LOGGER.info("Message send successfully: {}", r.getRecordMetadata());
-            }
-        });
+        SendResult<String, ProductCreatedEvent> result = kafkaTemplate.send("product-created-event-topic", productId, productCreatedEvent).get();
+
+        LOGGER.info("Topic: {}", result.getProducerRecord().topic());
+        LOGGER.info("Partition: {}", result.getProducerRecord().partition());
+        LOGGER.info("Offset: {}", result.getRecordMetadata().offset());
+
         LOGGER.info("Return: {}", productId);
         return productId;
     }
